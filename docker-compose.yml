@@ -1,0 +1,43 @@
+
+version: "3"
+services:
+  postgres:
+    image: postgres:15.3
+    networks:
+      - postgres
+    volumes:
+      - /var/postgres:/data/postgres
+    env_file:
+      - docker.env
+ 
+  pgadmin:
+    image: dpage/pgadmin4:7.1
+    networks:
+      - postgres
+    ports:
+      - "8080:80"
+    volumes:
+      - /var/pgadmin:/root/.pgadmin
+    env_file:
+      - docker.env
+ 
+  api:
+    build:
+      context: .
+      target: install-dependencies
+    command:
+      npm run start:dev
+    volumes:
+      - ./src:/user/src/app/src
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - postgres
+ 
+networks:
+  postgres:
+    driver: bridge
